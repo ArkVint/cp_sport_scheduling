@@ -18,7 +18,7 @@ subject to
 	//All matches
 	forall(i,j in teams)
 		sum(r in 1..nbRounds) x[i][j][r] == M[i][j];
-	
+	/*
 		
 		
 	//One game per day by i
@@ -32,13 +32,15 @@ subject to
 		
 	forall(i in teams, r in 1..nbRounds)
 		sum(j in teams) (x[i][j][r] == x[j][i][r] && x[i][j][r] == 1)  == 0;
-			
-		
-			
+		*/	
+	forall(i in teams, r in 1..nbRounds)	
+		count(append(all(j in teams)x[i][j][r], all(j in teams)x[j][i][r]), 1) <= 1;
+		/*	
 		
 	//Set venues
+	
 	forall(i,j in teams, r in rounds)
-		x[i][j][r] == 1 => v[i][r] == i && v[j][r] == i;
+		x[i][j][r] == 1 => v[i][r] == i ;
 	
 	//Start and finish at home
 	forall(i in teams){
@@ -52,5 +54,5 @@ subject to
 	  	
 		sum(j in teams) (x[i][j][r]+x[j][i][r]) == 0 => v[i][r] == v[i][r-1];
 	
-	
+	*/
 }
