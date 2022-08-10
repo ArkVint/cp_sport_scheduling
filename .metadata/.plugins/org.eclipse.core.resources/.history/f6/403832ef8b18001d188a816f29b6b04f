@@ -1,0 +1,59 @@
+/*********************************************
+ * OPL 12.8.0.0 Model
+ * Author: �������
+ * Creation Date: 09 ���. 2022 �. at 14:19:44
+ *********************************************/
+using CP;
+int nbTeams = ...;
+range teams = 1..nbTeams;
+int nbRounds = ...;
+range rounds = 1..nbRounds;
+int M[teams][teams]=...;
+
+dvar int x[teams][teams][1..nbRounds] in 0..1;
+dvar int v[1..nbTeams][0..nbRounds+1] in 1..nbTeams;
+
+subject to
+{	
+	//All matches
+	forall(i,j in teams)
+		sum(r in 1..nbRounds) x[i][j][r] == M[i][j];
+	
+		
+		
+	//One game per day by i
+	forall(i in teams, r in 1..nbRounds)
+		sum(j in teams) x[i][j][r] <= 1;
+		
+	//One game per day by j
+	forall(j in teams, r in 1..nbRounds)
+		sum(i in teams) x[i][j][r] <= 1;
+		
+		
+		//One game per day by j
+	forall(i in teams, r in 1..nbRounds)
+		sum(j in teams) (x[i][j][r] == x[j][i][r] && x[i][j][r] == 1)  == 0;
+			
+		
+			
+		
+	//Set venues
+	forall(i,j in teams, r in rounds)
+		x[i][j][r] == 1 => v[i][r] == i && v[j][r] == i;
+	/*
+	//Start and finish at home
+	forall(i in teams){
+		v[i][0] == i;
+		v[i][nbRounds+1] == i;
+	}
+	
+	
+	
+	
+	//Stay at the same venue during a bye
+	forall(i in teams, r in rounds)
+	  	
+		sum(j in teams) (x[i][j][r]+x[j][i][r]) == 0 => v[i][r] == v[i][r-1];
+	*/
+	
+}

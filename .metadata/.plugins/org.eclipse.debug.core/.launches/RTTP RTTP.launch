@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="opl.launchType">
+<stringAttribute key="opl.debugModel.ATTR_ELEMENT_ID" value="=\RTTPRКонфигурации запускаr\RTTP"/>
+<stringAttribute key="opl.debugModel.ATTR_PROJECT" value="RTTP"/>
+<stringAttribute key="opl.debugModel.ATTR_RUN_CONFIG" value="RTTP"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/RTTP"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+</launchConfiguration>

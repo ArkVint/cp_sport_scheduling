@@ -1,0 +1,19 @@
+/*********************************************
+ * OPL 12.8.0.0 Model
+ * Author: �������
+ * Creation Date: 09 ���. 2022 �. at 14:19:44
+ *********************************************/
+using CP;
+int nbTeams = ...;
+range teams = 1..nbTeams;
+int nbRounds = ...;
+int M[teams][teams]=...;
+
+dvar int x[teams][teams][0..nbRounds+1] in 0..1;
+
+subject to
+{
+	forall(i,j in teams)
+		sum(r in 0..nbRounds+1) x[i][j][r] != M[i][j];
+
+}

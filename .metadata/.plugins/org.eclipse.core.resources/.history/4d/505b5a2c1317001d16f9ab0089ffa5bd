@@ -1,0 +1,78 @@
+/*********************************************
+ * OPL 12.10.0.0 Model
+ * Authors: Alexander De Munster, Bram D'haenens
+ *********************************************/
+5 using CP;
+6 int nbTeams = ...;
+7 range teams = 1..nbTeams;
+8 int B = ...;
+9 range byes = 0..B;
+10 int nbRounds = 2*(nbTeams-1)+B;
+11 range rounds = 1..nbRounds;
+12 int Ub = ...;
+13 int D[teams,teams]=...;
+14 dvar int x[teams][teams] in 0..nbRounds;
+15 dvar int v[1..nbTeams][0..nbRounds+1] in 1..nbTeams;
+16 execute{
+17 writeln("Defining search strategy and setting parameters");
+18 cp.param.TimeLimit = 30*60;
+19 var f=cp.factory;
+20 var phase1 = f.searchPhase(x, f.selectSmallest(f.domainSize()),
+21 f.selectLargest(f.value()));
+22 var phase2 = f.searchPhase(v, f.selectSmallest(f.domainSize()),
+23 f.selectLargest(f.value()));
+24 cp.setSearchPhases(phase1, phase2);
+25 cp.param.PresolveLevel=6;
+26 cp.param.Workers = 4;
+27 cp.param.AllDiffInferenceLevel = 6;
+28 cp.param.CountInferenceLevel = 6;
+29 }
+30 minimize sum(i in teams,r in 0..nbRounds)D[v[i][r],v[i][r+1]];
+31 subject to
+32 {
+33 //One game per day
+34 forall(i in teams)
+35 allDifferent(append(all (j in teams: j!=i) x[i][j], all (j in teams) x[j][i]));
+36 //Not against self
+37 forall(i in teams)
+38 x[i][i] == 0;
+39 //Set venues
+40 forall(i,j in teams, r in rounds)
+41 x[i][j] == r => v[i][r] == i && v[j][r] == i;
+42 //Start and finish at home
+43 forall(i in teams){
+44 v[i][0] == i;
+45 v[i][nbRounds+1] == i;
+46 }
+47 //Stay at the same venue during a bye
+48 forall(i in teams, r in rounds)
+49 count(append(all(j in teams)x[i][j], all(j in teams)x[j][i]), r) == 0
+50 => v[i][r] == v[i][r-1];
+51 //No repeat constraints
+52 forall(i,j in teams: i<j)
+53 abs(x[i][j] - x[j][i]) > 1;
+Pagina1A.1
+CP.mod
+54 //At most constraints home games
+55 forall (b in byes,r in 1..nbRounds-Ub+b, i in teams)
+56 sum(n in 0..Ub+b)count(all(j in teams)x[i][j], r+n)== 0
+57 => sum(n in 0..Ub+b)count(all(j in teams)x[j][i], r+n) <= Ub;
+58 //At most constraints away games
+59 forall (b in byes,r in 1..nbRounds-Ub+b, i,j in teams)
+60 sum(n in 0..Ub+b)count(all(j in teams)x[i][j], r+n)== 0
+61 => sum(n in 0..Ub+b)count(all(j in teams)x[j][i], r+n) <= Ub;
+62 //Redundant Constraints
+63 forall (r in 1..nbRounds-Ub-B, i in teams) {
+64 sum(p in 0..Ub+B) count(all(j in teams) x[i][j], r+p) >= 1;
+65 sum(p in 0..Ub+B) count(all(j in teams) x[j][i], r+p) >= 1;
+66 }
+67 forall(i in teams, k in 1..nbTeams-1){
+68 sum(r in 1..nbRounds-k*(Ub+1)) count(all(j in teams) x[i][j], r) >= nbTeams-1-k*Ub;
+69 sum(r in 1..nbRounds-k*(Ub+1)) count(all(j in teams) x[j][i], r) >= nbTeams-1-k*Ub;
+70 }
+71 forall(r in rounds){
+72 count(all(i,j in teams: i!=j) x[i][j], r) <= nbTeams/2;
+73 }
+74 //Symmetry breaking
+75 x[1][2]>x[2][1];
+76 }

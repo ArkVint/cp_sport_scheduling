@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="opl.launchType">
+<stringAttribute key="opl.debugModel.ATTR_ELEMENT_ID" value="=ext\ra_matchesRКонфигурации запускаrext\ra_matches"/>
+<stringAttribute key="opl.debugModel.ATTR_PROJECT" value="extra_matches"/>
+<stringAttribute key="opl.debugModel.ATTR_RUN_CONFIG" value="extra_matches"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/extra_matches"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+</launchConfiguration>
