@@ -9,17 +9,22 @@ int bbye=0;
 int home=1;
 int away=2;
 
+int nbTeamGames = ...;
 
 int M[rngTeams][rngTeams]=...;
 int D[rngTeams,rngTeams]=...;
 int HAP[rngTeams,rngRounds]=...;
+int PR[rngTeams,1..nbTeamGames]=...;
+int NativeSolution[rngTeams,rngRounds]=...;
+int TeamsDist[rngTeams]=...;
+
 
 dvar int x[rngTeams,rngRounds] in 0..nbTeams;
 dvar int v[rngTeams][0..nbRounds+1] in rngTeams;
 
 execute{
   writeln("Defining search strategy and setting parameters");
-  cp.param.TimeLimit = 5*60;
+  cp.param.TimeLimit = 3*60;
   var f=cp.factory;
  
   var phase1 = f.searchPhase(x, f.selectSmallest(f.domainSize()),
@@ -41,16 +46,20 @@ execute{
   
 }
 
+dexpr int seqCount = sum(g in 1 .. nbTeamGames-1, t in rngTeams) (x[t][PR[t][g]] == x[t][PR[t][g+1]]);
+dexpr int distance = sum(i in rngTeams, r in 0..nbRounds)D[v[i][r],v[i][r+1]];
 
 
-minimize sum(i in rngTeams, r in 0..nbRounds)D[v[i][r],v[i][r+1]];
+//minimize sum(i in rngTeams, r in 0..nbRounds)D[v[i][r],v[i][r+1]];
+//minimize staticLex(distance, seqCount);
+minimize distance;
 subject to
 { 
-
+   
    forall(r in rngRounds, t in rngTeams) {
       x[t,r] != t;
    };
-   	
+	       	
    forall (r in rngRounds, t1 in rngTeams, t2 in rngTeams: t2 != t1)
       (x[t1,r] == t2) == (x[t2,r] == t1);
       
@@ -71,13 +80,14 @@ subject to
    forall ( r in rngRounds, t1 in rngTeams, t2 in rngTeams : t2 != t1)
    	  x[t1,r] == t2 && HAP[t1,r] == away => HAP[t2,r] == home;
    	
-  forall (t1 in rngTeams, t2 in rngTeams : t2 != t1) 
-  	sum(r in rngRounds) (x[t1,r] == t2 && HAP[t1,r] == home) == M[t1][t2];
+    forall (t1 in rngTeams, t2 in rngTeams : t2 != t1) 
+    sum(r in rngRounds) (x[t1,r] == t2 && HAP[t1,r] == home) == M[t1][t2];
   
   forall (t1 in rngTeams, t2 in rngTeams : t2 != t1) 
   	sum(r in rngRounds) (x[t1,r] == t2 && HAP[t1,r] == away) == M[t1][t2];
   
-  
+  //sum(g in 1 .. nbTeamGames-1, t in rngTeams) (x[t][PR[t][g]] == x[t][PR[t][g+1]]) <= 8;
+
   //Set venues
    forall (r in rngRounds, t in rngTeams : HAP[t,r] != bbye)  {
    	 HAP[t,r] == home  => v[t][r] == t && v[x[t,r]][r] == t; 
@@ -94,8 +104,27 @@ subject to
   forall(r in rngRounds, t in rngTeams)
     x[t][r] == 0 =>  v[t][r] == v[t][r-1];
     
+   
+  
+   forall(t in rngTeams){
+  		sum( r in 0..nbRounds) D[v[t][r],v[t][r+1]] <= TeamsDist[t];    
+   }
+  
+ }   
+  	
+	
+main
+{
+		thisOplModel.generate();
+		var sol=new IloOplCPSolution();
+		for(var t in thisOplModel.rngTeams)
+			for(var r in thisOplModel.rngRounds)
+				sol.setValue(thisOplModel.x[t][r], Opl.abs(thisOplModel.NativeSolution[t][r]));
+	    cp.setStartingPoint(sol);  
+		cp.solve();
+		thisOplModel.postProcess();
+	  
 }
-
 
 int res[t in rngTeams, r in rngRounds]=
 (HAP[t,r]==home)?(x[t][r]):
